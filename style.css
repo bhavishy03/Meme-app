@@ -1,0 +1,120 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #111;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.reel-container {
+  width: 100%;
+  max-width: 430px;
+  height: 92vh;
+  background: #000;
+  border-radius: 25px;
+  overflow: hidden;
+  position: relative;
+  color: white;
+}
+
+
+/* TOP BAR */
+.top-bar {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-img {
+  height: 45px;
+  width: 45px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.follow-btn {
+  background: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* MEME IMAGE */
+.meme-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+/* RIGHT ICONS */
+.right-icons {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 110px;
+}
+
+.icon-box {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 30px;
+  text-align: center;
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+.icon-box span {
+  font-size: 14px;
+  display: block;
+  margin-top: 5px;
+}
+
+/* BOTTOM CAPTION BOX */
+.bottom-box {
+  position: absolute;
+  bottom: 30px;
+  left: 20px;
+  right: 20px;
+}
+
+.bottom-box h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.tags {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.tags span {
+  background: rgba(255,255,255,0.25);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  backdrop-filter: blur(6px);
+}
