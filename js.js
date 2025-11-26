@@ -1,126 +1,114 @@
 // =====================
-// SELECTORS
+// ELEMENT SELECTORS
 // =====================
-const mediaContainer = document.getElementById("media-container");
+const reelContainer = document.querySelector(".reel-container");
+const mediaContainer = document.getElementById("media-container"); // Naya container banaya hai
 const captionTitle = document.querySelector(".bottom-box h3");
-const likeBox = document.querySelector(".icon-box");
+const likeBox = document.querySelectorAll(".icon-box")[0];
 
-let memeQueue = [];
+let memeQueue = []; // Preloaded memes
 let isLoading = false;
-const usedUrls = new Set(); // ← Repeat bilkul zero rahega
 
 // =====================
-// FETCH FROM PORNREELS API (Zero repeat + Vertical videos)
+// FETCH MULTIPLE MEMES AT ONCE (No repeat + Video support)
 // =====================
-async function fetchPornReel() {
+async function fetchMemes(count = 15) {
     try {
-        const res = await fetch("https://pornreels.api.dev/api/v1/random");
-        if (!res.ok) throw new Error("API down");
-
+        const res = await fetch(`https://meme-api.com/gimme/sexy/${count}`);
         const data = await res.json();
-
-        const videoUrl = data.videoUrl || data.url;
-        const title = data.title || data.description || "Hot Reel 🔥";
-
-        // Repeat check
-        if (videoUrl && !usedUrls.has(videoUrl)) {
-            usedUrls.add(videoUrl);
-            memeQueue.push({ url: videoUrl, title });
-        }
-
-        // Agar queue khali hai to turant load karo
-        if (memeQueue.length === 1) loadNext();
-
-        // Background mein aur videos preload karte raho
-        if (memeQueue.length < 8) {
-            setTimeout(fetchPornReel, 800);
-        }
-
+        memeQueue = [...memeQueue, ...data.memes.filter(m => m.url)]; // Valid URLs only
     } catch (err) {
-        console.log("PornReels down → backup try kar raha...");
-        // Backup API (kabhi kabhi zaroori)
-        fetch("https://nsfwxxx.api.dev/video")
-            .then(r => r.json())
-            .then(d => {
-                if (d.video && !usedUrls.has(d.video)) {
-                    usedUrls.add(d.video);
-                    memeQueue.push({ url: d.video, title: "NSFW 🔥" });
-                    if (memeQueue.length === 1) loadNext();
-                }
-            });
+        console.log("API Error:", err);
     }
 }
 
 // =====================
-// LOAD NEXT VIDEO
+// LOAD NEXT MEME (Image ya Video)
 // =====================
-function loadNext() {
+function loadNextMeme() {
     if (isLoading || memeQueue.length === 0) return;
     isLoading = true;
 
-    const item = memeQueue.shift();
-    
+    const meme = memeQueue.shift(); // Queue se nikaalo
+
+    // Fade out
     mediaContainer.classList.add("fade");
 
     setTimeout(() => {
-        mediaContainer.innerHTML = `
-            <video 
-                class="meme-media" 
-                src="${item.url}" 
-                autoplay 
-                muted 
-                loop 
-                playsinline>
-            </video>
-        `;
-        captionTitle.textContent = item.title;
+        mediaContainer.innerHTML = ''; // Clear previous
 
+        let mediaElement;
+        if (meme.url.endsWith('.mp4') || meme.url.includes('.gifv')) {
+            // VIDEO
+            mediaElement = document.createElement('video');
+            mediaElement.src = meme.url;
+            mediaElement.autoplay = true;
+            mediaElement.muted = true;
+            mediaElement.loop = true;
+            mediaElement.playsInline = true;
+            mediaElement.className = "meme-media";
+        } else {
+            // IMAGE
+            mediaElement = document.createElement('img');
+            mediaElement.src = meme.url;
+            mediaElement.className = "meme-media";
+        }
+
+        mediaElement.alt = meme.title;
+        captionTitle.textContent = meme.title || "Sexy Vibes 🔥";
+
+        mediaContainer.appendChild(mediaElement);
         mediaContainer.classList.remove("fade");
+
         isLoading = false;
 
-        // Aur videos preload karo
-        if (memeQueue.length < 5) fetchPornReel();
+        // Agar queue khatam hone wala hai → aur fetch kar lo
+        if (memeQueue.length < 5) {
+            fetchMemes(15);
+        }
     }, 250);
 }
 
+// Initial load
+fetchMemes(15).then(() => {
+    setTimeout(loadNextMeme, 500);
+});
+
 // =====================
-// SWIPE TO NEXT (Mobile + Desktop)
+// SWIPE CONTROLS (Mobile + Desktop)
 // =====================
 let startY = 0;
-let cooldown = false;
+let swipeCooldown = false;
 
-function nextVideo() {
-    if (cooldown) return;
-    cooldown = true;
-    loadNext();
-    setTimeout(() => cooldown = false, 500);
+function safeNext() {
+    if (swipeCooldown) return;
+    swipeCooldown = true;
+    loadNextMeme();
+    setTimeout(() => swipeCooldown = false, 500);
 }
 
-// Touch
+// Touch Events
 document.addEventListener("touchstart", e => startY = e.touches[0].clientY);
 document.addEventListener("touchend", e => {
-    if (startY - e.changedTouches[0].clientY > 100) nextVideo();
+    const diff = startY - e.changedTouches[0].clientY;
+    if (diff > 100) safeNext();
 });
 
-// Mouse
-document.addEventListener("mousedown", e => startY = e.clientY);
+// Mouse Events (Desktop)
+let mouseStartY = 0;
+document.addEventListener("mousedown", e => mouseStartY = e.clientY);
 document.addEventListener("mouseup", e => {
-    if (startY - e.clientY > 100) nextVideo();
+    const diff = mouseStartY - e.clientY;
+    if (diff > 100) safeNext();
 });
 
 // =====================
-// LIKE BUTTON
+// LIKE ANIMATION
 // =====================
 let liked = false;
 likeBox.addEventListener("click", () => {
     liked = !liked;
     likeBox.innerHTML = liked ? "❤️" : "🤍";
     likeBox.classList.add("like-anim");
-    setTimeout(() => likeBox.classList.remove("like-anim"), 400);
+    setTimeout(() => likeBox.classList.remove("like-anim"), 300);
 });
-
-// =====================
-// START KAR DO!
-// =====================
-fetchPornReel(); // Pehla video load
-fetchPornReel(); // Background mein aur load karo
