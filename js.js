@@ -19,7 +19,7 @@ const captionTitle = document.querySelector(".bottom-box h3");
 
 async function loadMeme() {
     try {
-        const res = await fetch("https://meme-api.com/gimme");
+        const res = await fetch("https://meme-api.com/gimme/sexy");
         const data = await res.json();
 
         memeImg.src = data.url;
