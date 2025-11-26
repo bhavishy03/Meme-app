@@ -22,7 +22,7 @@ async function loadMeme() {
         // Fade-out animation
         memeImg.classList.add("fade");
 
-        const res = await fetch("https://meme-api.com/gimme");
+        const res = await fetch("https://meme-api.com/gimme/sexy");
         const data = await res.json();
 
         setTimeout(() => {
