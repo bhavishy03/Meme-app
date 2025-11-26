@@ -14,7 +14,7 @@ let isLoading = false;
 // =====================
 async function fetchMemes(count = 15) {
     try {
-        const res = await fetch(`https://meme-api.com/gimme/${count}`);
+        const res = await fetch(`https://pornreels.api.dev/api/v1/random`);
         const data = await res.json();
         memeQueue = [...memeQueue, ...data.memes.filter(m => m.url)]; // Valid URLs only
     } catch (err) {
