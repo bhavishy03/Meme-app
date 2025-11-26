@@ -1,104 +1,114 @@
 // =====================
 // ELEMENT SELECTORS
 // =====================
-
 const reelContainer = document.querySelector(".reel-container");
-const memeImg = document.getElementById("meme-img");
-const iconBoxes = document.querySelectorAll(".icon-box");
-
-const likeBox = iconBoxes[0];
-const commentBox = iconBoxes[1];
-const saveBox = iconBoxes[2];
-
+const mediaContainer = document.getElementById("media-container"); // Naya container banaya hai
 const captionTitle = document.querySelector(".bottom-box h3");
+const likeBox = document.querySelectorAll(".icon-box")[0];
 
+let memeQueue = []; // Preloaded memes
+let isLoading = false;
 
 // =====================
-// RANDOM MEME FUNCTION (Smooth Animation)
+// FETCH MULTIPLE MEMES AT ONCE (No repeat + Video support)
 // =====================
-
-async function loadMeme() {
+async function fetchMemes(count = 15) {
     try {
-        // Fade-out animation
-        memeImg.classList.add("fade");
-
-        const res = await fetch("https://meme-api.com/gimme/sexy");
+        const res = await fetch(`https://meme-api.com/gimme/sexy/${count}`);
         const data = await res.json();
-
-        setTimeout(() => {
-            memeImg.src = data.url;
-            captionTitle.textContent = data.title;
-            memeImg.classList.remove("fade"); // Fade-in
-        }, 200);
-
+        memeQueue = [...memeQueue, ...data.memes.filter(m => m.url)]; // Valid URLs only
     } catch (err) {
         console.log("API Error:", err);
     }
 }
 
-// First Meme Load
-loadMeme();
+// =====================
+// LOAD NEXT MEME (Image ya Video)
+// =====================
+function loadNextMeme() {
+    if (isLoading || memeQueue.length === 0) return;
+    isLoading = true;
 
+    const meme = memeQueue.shift(); // Queue se nikaalo
+
+    // Fade out
+    mediaContainer.classList.add("fade");
+
+    setTimeout(() => {
+        mediaContainer.innerHTML = ''; // Clear previous
+
+        let mediaElement;
+        if (meme.url.endsWith('.mp4') || meme.url.includes('.gifv')) {
+            // VIDEO
+            mediaElement = document.createElement('video');
+            mediaElement.src = meme.url;
+            mediaElement.autoplay = true;
+            mediaElement.muted = true;
+            mediaElement.loop = true;
+            mediaElement.playsInline = true;
+            mediaElement.className = "meme-media";
+        } else {
+            // IMAGE
+            mediaElement = document.createElement('img');
+            mediaElement.src = meme.url;
+            mediaElement.className = "meme-media";
+        }
+
+        mediaElement.alt = meme.title;
+        captionTitle.textContent = meme.title || "Sexy Vibes 🔥";
+
+        mediaContainer.appendChild(mediaElement);
+        mediaContainer.classList.remove("fade");
+
+        isLoading = false;
+
+        // Agar queue khatam hone wala hai → aur fetch kar lo
+        if (memeQueue.length < 5) {
+            fetchMemes(15);
+        }
+    }, 250);
+}
+
+// Initial load
+fetchMemes(15).then(() => {
+    setTimeout(loadNextMeme, 500);
+});
 
 // =====================
-// IMPROVED SWIPE (Mobile + Desktop)
+// SWIPE CONTROLS (Mobile + Desktop)
 // =====================
-
 let startY = 0;
 let swipeCooldown = false;
 
-function safeLoadMeme() {
+function safeNext() {
     if (swipeCooldown) return;
-
     swipeCooldown = true;
-    loadMeme();
-
-    setTimeout(() => {
-        swipeCooldown = false;
-    }, 400); // prevents spam
+    loadNextMeme();
+    setTimeout(() => swipeCooldown = false, 500);
 }
 
-// MOBILE SWIPE
-document.addEventListener("touchstart", (e) => {
-    startY = e.touches[0].clientY;
+// Touch Events
+document.addEventListener("touchstart", e => startY = e.touches[0].clientY);
+document.addEventListener("touchend", e => {
+    const diff = startY - e.changedTouches[0].clientY;
+    if (diff > 100) safeNext();
 });
 
-document.addEventListener("touchend", (e) => {
-    let endY = e.changedTouches[0].clientY;
-    let diff = startY - endY;
-
-    if (diff > 120) safeLoadMeme(); // Swipe UP only
-});
-
-// DESKTOP SWIPE
+// Mouse Events (Desktop)
 let mouseStartY = 0;
-let mouseDown = false;
-
-document.addEventListener("mousedown", (e) => {
-    mouseDown = true;
-    mouseStartY = e.clientY;
+document.addEventListener("mousedown", e => mouseStartY = e.clientY);
+document.addEventListener("mouseup", e => {
+    const diff = mouseStartY - e.clientY;
+    if (diff > 100) safeNext();
 });
 
-document.addEventListener("mouseup", (e) => {
-    if (!mouseDown) return;
-    mouseDown = false;
-
-    let diff = mouseStartY - e.clientY;
-
-    if (diff > 120) safeLoadMeme(); // Swipe UP
-});
-
-
 // =====================
-// LIKE TOGGLE (With pop animation)
+// LIKE ANIMATION
 // =====================
-
 let liked = false;
-
 likeBox.addEventListener("click", () => {
     liked = !liked;
     likeBox.innerHTML = liked ? "❤️" : "🤍";
-
     likeBox.classList.add("like-anim");
-    setTimeout(() => likeBox.classList.remove("like-anim"), 150);
+    setTimeout(() => likeBox.classList.remove("like-anim"), 300);
 });
