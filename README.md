@@ -31,7 +31,4 @@ README.md
 `https://meme-api.com/gimme`
 
 ## Author
-Bhavishy
-
-## Author
-Bhavishy
+Bhavishy Rajak
