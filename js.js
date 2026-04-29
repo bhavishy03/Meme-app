@@ -14,7 +14,7 @@ let isLoading = false;
 // =====================
 async function fetchMemes(count = 15) {
     try {
-       const res = await fetch(`https://nsfw1.p.rapidapi.com/nsfw ${count}`)
+       const res = await fetch(`https://nsfw1.p.rapidapi.com/nsfw /`)
         const data = await res.json();
         memeQueue = [...memeQueue, ...data.memes.filter(m => m.url)]; // Valid URLs only
     } catch (err) {
