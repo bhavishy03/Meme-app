@@ -14,7 +14,7 @@ let isLoading = false;
 // =====================
 async function fetchMemes(count = 15) {
     try {
-       const res = await fetch(`https://console.apify.com/storage/datasets`)
+       const res = await fetch(`https://hyperspice-isporn-v1.p.rapidapi.com/?img=https%3A%2F%2Fwww.google.com%2Fimages%2Fbranding%2Fgooglelogo%2F2x%2Fgooglelogo_color_272x92dp.png`)
         const data = await res.json();
         memeQueue = [...memeQueue, ...data.memes.filter(m => m.url)]; // Valid URLs only
     } catch (err) {
